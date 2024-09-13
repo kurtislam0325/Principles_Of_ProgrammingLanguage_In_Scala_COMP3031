@@ -52,5 +52,5 @@ object Lists:
       else maxAcc(xs.tail, if xs.head > acc then xs.head else acc)
     }
 
-    maxAcc(xs, xs.head)
+    maxAcc(xs.tail, xs.head)
   }
