@@ -14,7 +14,6 @@ enum Tree[K, V] extends TreeInterface[K, V]:
           tree match {
             case Leaf(key, _) => {
               key == head 
-
             } 
             case Node(key, children) => {
               val c = children.find(child => child.key == head)
@@ -116,7 +115,11 @@ enum Tree[K, V] extends TreeInterface[K, V]:
                   )
                 }
                 case None => { // no children has the key
-                  children :+ Node(head, List(updatedRecur(Node(tail.head, Nil), Path[K](tail))))
+                  children :+ (if (tail.length == 1) {
+                    Node(head, List(updatedRecur(Node(tail.head, Nil), Path[K](tail))))
+                  } else {
+                    Node(head, List(Node(tail.head, List(updatedRecur(Node(tail.head, Nil), Path[K](tail.tail))))))
+                  })
                 }
               }
               
@@ -150,7 +153,7 @@ enum Tree[K, V] extends TreeInterface[K, V]:
                   children.map(
                     child => child match {
                       case Leaf(key, payload) => {
-                        if (key == s.key) Node(key, List(updatedRecur(Node(tail.head, Nil), Path[K](tail), payload))) else Leaf(key, payload)
+                        if (key == s.key) Node(key, List(updatedRecur(Node(tail.head, Nil), Path[K](tail.tail), payload))) else Leaf(key, payload)
                       }
                       case Node(key, children) => {
                         if (key == s.key) {                       
@@ -169,8 +172,12 @@ enum Tree[K, V] extends TreeInterface[K, V]:
                     }
                   )
                 }
-                case None => { // no children has the key
-                  children :+ Node(head, List(updatedRecur(Node(tail.head, Nil), Path[K](tail), payload)))
+                case None => { // no children has the key           
+                  children :+ (if (tail.length == 1) {
+                    Node(head, List(updatedRecur(Node(tail.head, Nil), Path[K](tail), payload)))
+                  } else {
+                    Node(head, List(Node(tail.head, List(updatedRecur(Node(tail.head, Nil), Path[K](tail.tail), payload)))))
+                  })
                 }
               }
               
