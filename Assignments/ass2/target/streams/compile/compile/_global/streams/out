@@ -1,0 +1,8 @@
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E134] Type Error: /Users/kurtislam/GitHub/Principles_Of_ProgrammingLanguage_COMP3031/Assignments/ass2/src/main/scala/ass2/Minimax.scala:15:6 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m15 |[0m      println(node.state, node.lastMove)             [0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m      ^^^^^^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mNone of the overloaded alternatives of [33mmethod[0m [35mprintln[0m in [33mobject[0m [35mPredef[0m with types[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m (x: Any): Unit[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m (): Unit[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mmatch arguments ((node.state : State), (node.lastMove : Option[Move]))[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
