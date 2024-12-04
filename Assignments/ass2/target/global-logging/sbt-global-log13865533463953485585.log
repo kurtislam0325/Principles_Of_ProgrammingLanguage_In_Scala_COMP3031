@@ -1,8 +1,0 @@
-[0m[[0m[0mdebug[0m] [0m[0m> Exec(test, Some(37cc4fdb-6f60-4539-afc2-dbf54f59fc4d), Some(CommandSource(console0)))[0m
-[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Test / test[0m
-[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
-[0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to /Users/kurtislam/GitHub/Principles_Of_ProgrammingLanguage_COMP3031/Assignments/ass2/target/scala-3.5.1/classes ...[0m
-[0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to /Users/kurtislam/GitHub/Principles_Of_ProgrammingLanguage_COMP3031/Assignments/ass2/target/scala-3.5.1/test-classes ...[0m
-[0m[[0m[0minfo[0m] [0m[0mPassed: Total 1, Failed 0, Errors 0, Passed 1[0m
-[0m[[0m[32msuccess[0m] [0m[0mTotal time: 0 s, completed 16 Nov 2024, 18:37:10[0m
-[0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m

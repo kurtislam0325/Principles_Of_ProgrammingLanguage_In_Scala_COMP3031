@@ -27,7 +27,7 @@ case class Board(cells: Vector[Option[Mark]]):
         case None => " "
       .mkString("│ ", " │ ", " │")
     .mkString(
-      start = "┌───┬───┬───┐\n",
+      start = "\n┌───┬───┬───┐\n",
       sep = "\n├───┼───┼───┤\n",
       end = "\n└───┴───┴───┘\n")
 

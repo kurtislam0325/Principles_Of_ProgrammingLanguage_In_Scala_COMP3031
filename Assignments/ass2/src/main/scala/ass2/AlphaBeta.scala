@@ -9,8 +9,6 @@ class AlphaBeta[State, Move](override val game: Game[State, Move]) extends GameT
     // alpha: best value that the maximizing player can guarantee
     // beta: best value that the minimizing player can guarantee
     def miniMaxAlphaBeta(node: Node, alpha: Int, beta: Int): Int = {
-      // num = num + 1
-      // println(num)
       if game.gameOver(node.state) then
         return game.evaluate(node.state)     
 
