@@ -8,19 +8,18 @@ package ass3
 class LispSuite extends munit.FunSuite:
   import Lisp.evaluate
 
-  // test("Normal Functions"):
+  test("Normal Functions"):
     // DataList(List(Sym(def), Sym(x), DataList(List(Sym(lambda), DataList(List(Sym(arg))), DataList(List(Sym(*), Sym(arg), IntLit(2))))), DataList(List(Sym(x), IntLit(3)))))
-    // assertEquals(evaluate("(def x (lambda (arg) (* arg 2)) (x 3))"), "6")
+    assertEquals(evaluate("(def x (lambda (arg) (* arg 2)) (x 3))"), "6")
     // DataList(List(Sym(class), DataList(List(Sym(Pair), Sym(x), Sym(y))), DataList(List(Sym(val), Sym(p), DataList(List(Sym(Pair), StrLit(zero), IntLit(0))), DataList(List(Sym(sel), Sym(p), Sym(x)))))))
-    // assertEquals(evaluate("(class (Pair x y) (val p (Pair \"zero\" 0) (sel p x))))))"), "zero")
-    // assertEquals(evaluate("(def p 2 (sel p y))"), "0")
+    assertEquals(evaluate("(class (Pair x y) (val p (Pair \"zero\" 0) (sel p x))))))"), "zero")
 
   test("Field selection 1"):
     assertEquals(evaluate("(class (Pair x y) (val p (Pair \"zero\" 0) (sel p x))))))"), "zero")
     assertEquals(evaluate("(class (Pair x y) (val p (Pair \"zero\" 0) (sel p y))))))"), "0")
 
   test("Field selection 2"):
-    assertEquals(evaluate("(class (Pair x y) (class (Riap x y) (def f (lambda (p) (sel p x)) (val p (Pair 2 3) (val r (Riap 3 2) (* (f p) (f r)))))))"), "6")
+    assertEquals(evaluate("(class (Pair x y) (class (Riap x y) (def func (lambda (p) (sel p x)) (val p (Pair 2 3) (val r (Riap 3 2) (* (func p) (func r)))))))"), "6")
 
   test("Pattern matching 1"):
     // line 49: (List(Sym(Triple), Sym(x), Sym(y), Sym(z)),List(Sym(*), DataList(List(Sym(*), Sym(x), Sym(y))), Sym(z)))
@@ -35,7 +34,11 @@ class LispSuite extends munit.FunSuite:
     assertEquals(evaluate("(class (Pair x y) (class (Triple x y z) (def f (lambda (x) (case x ((Pair x y) (* x y)) (x (cons x nil)))) (val x (Triple 2 3 7) (sel (car (f x)) z)))))"), "7")
 
   test("Call-by-need: no need 1"):
+    assertEquals(evaluate("(val x (* 2 2) 0)"), "0")
+    assertEquals(evaluate("(val x (* 2 2) (* x x))"), "16")
+    assertEquals(evaluate("(def id (lambda (x, yt) x) (def zero (lambda (x) 0) (zero (id <expr>))))"), "0")
     assertEquals(evaluate("(def zero (lambda (x) 0) (zero nani))"), "0")
+    assertEquals(evaluate("(def sq (lambda (x) (* x x)) (sq (sq (sq (* 2 2)))))"), "65536")
 
   test("Call-by-need: no need 2"):
     assertEquals(evaluate("(class (Just x) (val x (Just nani) 0))"), "0")

@@ -1,9 +1,5 @@
 package ass3
 
-enum LazyValue:
-  case Unevaluated(expr: () => Value)
-  case Evaluated(value: Value)
-
 enum Data:
   case IntLit(n: Int)
   case StrLit(str: String)
@@ -18,6 +14,17 @@ enum Value:
   case Quoted(e: Data)
   case ValueList(xs: List[Value])
   case Lambda(f: PartialFunction[List[Value], Value])
+  case ThunkUnevaluated(symbol: Data, expr: () => Value)
+  case ThunkEvaluated(symbol: Data, value: Value)
+
+  def force: Value = this match {
+    case ThunkEvaluated(symbol, value) => value
+    case ThunkUnevaluated(symbol, expr) => {
+      val result = expr()
+      ThunkEvaluated(symbol, result)
+    }
+    case _ => throw new RuntimeException("force on wrong thing")
+  }  
 
 export Data.{Sym, DataList}
 export Value.{Quoted, ValueList, Lambda}

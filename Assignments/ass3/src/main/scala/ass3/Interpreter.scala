@@ -1,12 +1,12 @@
 package ass3
 
 import scala.Tuple.Head
+import ass3.Value.ThunkEvaluated
 
 trait Interpreter:
   self: LispImpl =>
 
   def eval(x: Data)(using env: Environment[Value])(using tydefs: Environment[List[String]]): Value = {
-    // println(x)
     x match      
       case Data.IntLit(n) => Value.IntLit(n)
       case Data.StrLit(s) => Value.StrLit(s)
@@ -14,14 +14,17 @@ trait Interpreter:
         val classDef = tydefs.contains(name)
 
         classDef match
-          case None => env.lookup(name)
+          case None => {
+            val x = env.lookup(name)
+            x match
+              case Value.ThunkEvaluated(symbol, value) => value
+              case _ => x            
+          }
           case Some(value) => Value.ValueList(value.map(Value.StrLit(_)))
       }
       // Pattern Matching (case)
       case DataList(Sym("case") :: Sym(scrut) :: branches) => {
         val v = eval(Sym(scrut))
-
-        println(s"line 22 branches: ${branches}");
         val cases = branches.map {
           case DataList(List(data_1: Data, data_2: DataList)) => {
             data_1 match
@@ -30,7 +33,7 @@ trait Interpreter:
               case x => throw SyntaxError(s"invalid case branch: ${x}")                    
           }
           case x => throw SyntaxError(s"invalid case branch: ${x}")          
-        }
+        }        
 
         v match
           case Value.Object(name, fields) => { 
@@ -49,11 +52,21 @@ trait Interpreter:
               case None => throw MatchError(s"match error on: ${scrut}")
               case Some(value) => {                
                 val (symbols, values) = fields.xs.map {
-                  case Value.Tuple(sym, v) => {
-                    val sym_string = sym match 
+                  case Value.Tuple(s, v) => {
+                    val sym_string = s match 
                       case Value.StrLit(str) => str
                       case _ => throw new RuntimeException("Input does not match the expected structure line 45")      
-                    (sym_string, v)
+
+                    val v_forced = v match 
+                      case Value.ThunkUnevaluated(_, _) => {
+                        v.force match
+                          case Value.ThunkEvaluated(symbol, value) => value
+                          case _ => throw new RuntimeException("Unexpected value type in Thunk evaluation.")
+                      }
+                      case Value.ThunkEvaluated(symbol, value) => value
+                      case _ => throw new RuntimeException("Unexpected value type in Thunk evaluation.")
+                    
+                    (sym_string, v_forced)
                   }
                    case _ => throw new RuntimeException("Input does not match the expected structure line 48")
                 }.unzip
@@ -66,8 +79,9 @@ trait Interpreter:
           }
           case _ => throw MatchError(s"match error on: ${scrut}")
       }      
-      case DataList(Sym("val") :: param :: expr :: rest :: Nil) =>
+      case DataList(Sym("val") :: param :: expr :: rest :: Nil) => {
         eval(rest)(using env.extend(paramName(param), eval(expr)))
+      }
       case DataList(Sym("def") :: param :: expr :: rest :: Nil) => {
         eval(rest)(using env.extendRec(paramName(param), env1 => eval(expr)(using env1)))
       }
@@ -97,7 +111,17 @@ trait Interpreter:
             }
 
             value match                        
-              case Some(Value.Tuple(sym, value)) => value
+              case Some(Value.Tuple(sym, value)) => {
+                value match {
+                  case Value.ThunkUnevaluated(_, _) => {
+                    value.force match
+                      case Value.ThunkEvaluated(symbol, value) => value
+                      case _ => throw new RuntimeException("Unexpected value type in Thunk evaluation.")
+                  }
+                  case Value.ThunkEvaluated(symbol, value) => value
+                  case _ => throw new RuntimeException("Unexpected value type in Thunk evaluation.")
+                }
+              }
               case Some(_) => throw FieldError(s"class C has no field ${fieldName}")         
               case None => throw FieldError(s"class C has no field ${fieldName}")    
           }     
@@ -106,10 +130,22 @@ trait Interpreter:
       }            
       case DataList(operator :: operands) => {
         eval(operator) match {
-          case Lambda(f) => f(operands.map(eval))
+          case Lambda(f) => {
+            val isBuiltInFunc = try
+              eval(operator)(using globalEnv)
+              true
+            catch
+              case _: UndefinedSymbol => false
+
+            val x = isBuiltInFunc match
+              case true => operands.map(o => Value.ThunkEvaluated(o, eval(o)).force)
+              case false => operands.map(o => Value.ThunkUnevaluated(o, () => eval(o)))
+
+            f(x)           
+          }
           case Value.ValueList(xs) => {
             val field_names = xs
-            val values = operands.map(eval)
+            val values = operands.map(o => Value.ThunkUnevaluated(o, () => eval(o)))
 
             if (field_names.length != values.length) then throw ClassArityMismatch(s"wrong arity for class ${className}")                
             Value.Object(operator, Value.ValueList(field_names.zip(values).map {
